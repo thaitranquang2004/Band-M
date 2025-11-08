@@ -11,6 +11,7 @@ import cloudinary from "cloudinary";
 import { v2 as cloudinaryV2 } from "cloudinary";
 import { fileURLToPath } from "url";
 import path from "path";
+import fs from "fs";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -85,8 +86,57 @@ import("./sockets/index.js").then(({ default: setupSockets }) => {
 import { errorHandler } from "./middleware/errorHandler.js";
 app.use(errorHandler);
 
-// 404 Handler
-app.use("*", (req, res) => res.status(404).json({ message: "Not found" }));
+// ========== PRODUCTION: Serve Frontend Static Files ==========
+if (process.env.NODE_ENV === "production") {
+  const frontendDistPath = path.join(__dirname, "../../frontend/dist");
+  console.log("NODE_ENV:", process.env.NODE_ENV);
+  console.log("Serving static from:", frontendDistPath);
+
+  if (!fs.existsSync(frontendDistPath)) {
+    console.error(
+      "ERROR: frontend/dist not found! Run 'npm run build' in frontend."
+    );
+    // Optional: Tạo placeholder để tránh crash
+    app.get("*", (req, res) =>
+      res.status(500).json({
+        message: "Frontend not built. Run 'cd frontend && npm run build'",
+      })
+    );
+  } else {
+    console.log("Frontend dist found OK!");
+
+    // Serve static assets TRƯỚC fallback
+    app.use(
+      express.static(frontendDistPath, {
+        index: false, // Không auto index.html cho subdirs
+      })
+    );
+    console.log("Static middleware registered");
+
+    // Fallback: Handle SPA routes (root + /chat/:id, etc.) - CHỈ non-API
+    app.get("*", (req, res) => {
+      if (req.path.startsWith("/api")) {
+        return res.status(404).json({ message: "API not found" }); // Catch API 404 ở đây
+      }
+      const indexPath = path.join(frontendDistPath, "index.html");
+      console.log("Serving index.html for path:", req.path);
+      if (fs.existsSync(indexPath)) {
+        return res.sendFile(indexPath);
+      } else {
+        console.error("index.html not found at:", indexPath);
+        return res.status(404).json({ message: "Frontend not built" });
+      }
+    });
+  }
+} else {
+  console.log("Running in DEV mode - No frontend serve");
+}
+
+// ========== 404 Handler CUỐI CÙNG: Chỉ cho unmatched API/static ==========
+app.use((req, res) => {
+  console.log("Final 404 hit for:", req.path); // Debug
+  res.status(404).json({ message: "Not found" });
+});
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
