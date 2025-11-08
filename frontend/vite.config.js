@@ -1,26 +1,20 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: "./", // Relative paths cho production serve (Render)
+  base: "./", // Relative cho Render serve static
   build: {
-    outDir: "dist", // Output folder cho static files
-    sourcemap: true, // Debug JS errors
-    rollupOptions: {
-      output: {
-        manualChunks: undefined, // Optimize chunks cho chat app
-      },
-    },
+    outDir: "dist",
+    sourcemap: true,
   },
   server: {
     port: 3000,
     proxy: {
-      "/api": {
-        target: "http://localhost:5000",
-        changeOrigin: true,
-      },
-    }, // Proxy API đến backend dev
+      "/api": "http://localhost:5000", // Proxy auth/chats/messages đến backend
+    },
+  },
+  optimizeDeps: {
+    include: ["socket.io-client"], // Optimize cho real-time (Vite 4.x cần explicit)
   },
 });
