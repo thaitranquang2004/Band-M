@@ -88,7 +88,7 @@ app.use(errorHandler);
 
 // ========== PRODUCTION: Serve Frontend Static Files ==========
 if (process.env.NODE_ENV === "production") {
-  const frontendDistPath = path.join(__dirname, "../../frontend/dist");
+  const frontendDistPath = path.join(__dirname, "../../frontend/build");
   console.log("NODE_ENV:", process.env.NODE_ENV);
   console.log("Serving static from:", frontendDistPath);
 
