@@ -13,7 +13,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await api.post("/auth/login", { username, password });
-      localStorage.setItem("token", response.data.accessToken);
+      localStorage.setItem("accessToken", response.data.accessToken);
       localStorage.setItem("user", JSON.stringify(response.data.user));
       navigate("/friends");
     } catch (error) {
