@@ -16,7 +16,7 @@ const ChatWindow = ({ chatId }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Fetch current user info for identifying 'sent' vs 'received'
+  // Fetch
   useEffect(() => {
     const fetchMe = async () => {
       try {
@@ -45,36 +45,42 @@ const ChatWindow = ({ chatId }) => {
     fetchMessages();
 
     if (socket) {
-        const handleNewMessage = (msg) => {
-            // Check if message belongs to current chat
-            if (msg.chat === chatId || msg.chatId === chatId) {
-                setMessages((prev) => [...prev, msg]);
-                scrollToBottom();
-            }
-        };
+      const handleNewMessage = (msg) => {
+        // Check if message belongs to current chat
+        if (msg.chat === chatId || msg.chatId === chatId) {
+          setMessages((prev) => [...prev, msg]);
+          scrollToBottom();
+        }
+      };
 
-        socket.on("newMessage", handleNewMessage);
+      socket.on("newMessage", handleNewMessage);
 
-        socket.on("messageEdited", (msg) => {
-          setMessages((prev) => prev.map((m) => (m._id === msg.messageId ? { ...m, content: msg.content, isEdited: true } : m)));
-        });
+      socket.on("messageEdited", (msg) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m._id === msg.messageId
+              ? { ...m, content: msg.content, isEdited: true }
+              : m
+          )
+        );
+      });
 
-        socket.on("messageDeleted", (msg) => {
-           setMessages((prev) => prev.filter((m) => m._id !== msg.messageId));
-        });
+      socket.on("messageDeleted", (msg) => {
+        setMessages((prev) => prev.filter((m) => m._id !== msg.messageId));
+      });
 
-        socket.on("messageReactionUpdate", ({ messageId, reactions }) => {
-          setMessages((prev) =>
-            prev.map((m) => (m._id === messageId ? { ...m, reactions } : m))
-          );
-        });
+      socket.on("messageReactionUpdate", ({ messageId, reactions }) => {
+        setMessages((prev) =>
+          prev.map((m) => (m._id === messageId ? { ...m, reactions } : m))
+        );
+      });
 
-        return () => {
-          socket.off("newMessage", handleNewMessage);
-          socket.off("messageEdited");
-          socket.off("messageDeleted");
-          socket.off("messageReactionUpdate");
-        };
+      return () => {
+        socket.off("newMessage", handleNewMessage);
+        socket.off("messageEdited");
+        socket.off("messageDeleted");
+        socket.off("messageReactionUpdate");
+      };
     }
   }, [chatId, socket]);
 
@@ -100,25 +106,29 @@ const ChatWindow = ({ chatId }) => {
 
   // Fetch chat details
   useEffect(() => {
-      if(!chatId) return;
-      const fetchChatDetails = async () => {
-          try {
-              const res = await api.get("/chats");
-              const found = res.data.chats.find(c => c._id === chatId || c.id === chatId);
-              if(found) {
-                  // Determine name
-                  let name = found.name;
-                  if(found.type === 'direct' || !name) {
-                      const other = found.participants.find(p => p._id !== currentUser?._id);
-                      name = other ? (other.fullName || other.username) : "Chat";
-                  }
-                  setChatInfo({ ...found, name });
-              }
-          } catch(err) {
-              console.error("Failed to fetch chat details", err);
+    if (!chatId) return;
+    const fetchChatDetails = async () => {
+      try {
+        const res = await api.get("/chats");
+        const found = res.data.chats.find(
+          (c) => c._id === chatId || c.id === chatId
+        );
+        if (found) {
+          // Determine name
+          let name = found.name;
+          if (found.type === "direct" || !name) {
+            const other = found.participants.find(
+              (p) => p._id !== currentUser?._id
+            );
+            name = other ? other.fullName || other.username : "Chat";
           }
-      };
-      if(currentUser) fetchChatDetails();
+          setChatInfo({ ...found, name });
+        }
+      } catch (err) {
+        console.error("Failed to fetch chat details", err);
+      }
+    };
+    if (currentUser) fetchChatDetails();
   }, [chatId, currentUser]);
 
   if (!chatId) {
@@ -138,70 +148,90 @@ const ChatWindow = ({ chatId }) => {
             <span>{chatInfo?.name?.[0]?.toUpperCase() || "#"}</span>
           </div>
           <div className="header-details">
-            <span className="header-name">{chatInfo?.name || "Loading..."}</span>
+            <span className="header-name">
+              {chatInfo?.name || "Loading..."}
+            </span>
           </div>
         </div>
-        <div className="header-actions">
-        </div>
+        <div className="header-actions"></div>
       </div>
 
       <div className="messages-container">
         {messages.map((msg) => {
-            const isSent = msg.sender._id === currentUser?._id || msg.sender === currentUser?._id;
-            const senderName = msg.sender.username || msg.sender.fullName || "User";
-            
-            return (
-                <div key={msg._id || msg.id} className={`message-group ${isSent ? 'sent' : 'received'}`}>
-                    <div className="message-bubble-container">
-                      <div className="message-bubble">
-                          {/* Ensure content is string */}
-                          {typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)}
-                      </div>
-                      <div className="reaction-actions">
-                        {['👍', '❤️', '😂', '😮', '😢', '😡'].map(emoji => (
-                          <button 
-                            key={emoji} 
-                            className="reaction-btn-mini"
-                            onClick={() => handleReaction(msg._id, emoji)}
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    {msg.reactions && msg.reactions.length > 0 && (
-                      <div className="message-reactions">
-                        {msg.reactions.map((r, idx) => (
-                          <span key={idx} className="reaction-item" title={r.user?.username}>
-                            {r.type}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <div className="message-info">
-                        {!isSent && <span className="sender-name">{senderName}</span>}
-                        <span className="message-time">
-                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                    </div>
+          const isSent =
+            msg.sender._id === currentUser?._id ||
+            msg.sender === currentUser?._id;
+          const senderName =
+            msg.sender.username || msg.sender.fullName || "User";
+
+          return (
+            <div
+              key={msg._id || msg.id}
+              className={`message-group ${isSent ? "sent" : "received"}`}
+            >
+              <div className="message-bubble-container">
+                <div className="message-bubble">
+                  {/* Ensure content is string */}
+                  {typeof msg.content === "string"
+                    ? msg.content
+                    : JSON.stringify(msg.content)}
                 </div>
-            );
+                <div className="reaction-actions">
+                  {["👍", "❤️", "😂", "😮", "😢", "😡"].map((emoji) => (
+                    <button
+                      key={emoji}
+                      className="reaction-btn-mini"
+                      onClick={() => handleReaction(msg._id, emoji)}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {msg.reactions && msg.reactions.length > 0 && (
+                <div className="message-reactions">
+                  {msg.reactions.map((r, idx) => (
+                    <span
+                      key={idx}
+                      className="reaction-item"
+                      title={r.user?.username}
+                    >
+                      {r.type}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="message-info">
+                {!isSent && <span className="sender-name">{senderName}</span>}
+                <span className="message-time">
+                  {new Date(msg.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+            </div>
+          );
         })}
         <div ref={messagesEndRef} />
       </div>
 
       <div className="message-input-area">
         <form className="input-wrapper" onSubmit={sendMessage}>
-            <input
+          <input
             type="text"
             className="message-input"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Type a message..."
-            />
-            <button type="submit" className="send-button" disabled={!content.trim()}>
-              <Send size={18} />
-            </button>
+          />
+          <button
+            type="submit"
+            className="send-button"
+            disabled={!content.trim()}
+          >
+            <Send size={18} />
+          </button>
         </form>
       </div>
     </div>

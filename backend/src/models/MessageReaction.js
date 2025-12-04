@@ -8,7 +8,7 @@ const messageReactionSchema = new mongoose.Schema(
       required: true,
     },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    reactionType: { type: String, required: true }, // e.g., 'heart', 'like'
+    reactionType: { type: String, required: true }, //'heart', 'like'
   },
   { timestamps: true }
 );

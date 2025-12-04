@@ -13,7 +13,7 @@ export const chatHandler = (io, socket) => {
       },
     };
 
-    // Broadcast to others in room (không emit back to sender để tránh duplicate)
+    // Broadcast to others in room
     socket.to(`chat_${chatId}`).emit("newMessage", messageData);
     console.log(`New message in chat ${chatId} from ${socket.user.username}`);
   };

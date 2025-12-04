@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import CryptoJS from "crypto-js"; // For content encryption
+import CryptoJS from "crypto-js";
 
 const messageSchema = new mongoose.Schema(
   {
@@ -24,7 +24,7 @@ const messageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hook: Encrypt content before save (use secret from env)
+// Hook: Encrypt content before save
 messageSchema.pre("save", function (next) {
   if (this.isModified("content") && this.type === "text") {
     this.content = CryptoJS.AES.encrypt(

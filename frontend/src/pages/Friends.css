@@ -1,4 +1,3 @@
-/* Container chung */
 .page-container {
   max-width: 1000px;
   margin: 20px auto;
@@ -16,7 +15,6 @@
   font-weight: 700;
 }
 
-/* Search Form */
 .friends-header {
   margin-bottom: 30px;
 }
@@ -83,7 +81,6 @@
   gap: 20px;
 }
 
-/* Friend Card */
 .friend-card {
   background: #fff;
   border: 1px solid #eef0f5;
@@ -158,7 +155,6 @@
   margin: 0;
 }
 
-/* Actions */
 .friend-card-actions {
   width: 100%;
   display: flex;
@@ -202,7 +198,6 @@
   flex: 1;
 }
 
-/* Empty State */
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
@@ -215,7 +210,6 @@
   margin-bottom: 16px;
 }
 
-/* Loading & Error */
 .loading-container {
   display: flex;
   flex-direction: column;

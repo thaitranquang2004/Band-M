@@ -12,7 +12,7 @@ import {
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
-// Load messages (pagination)
+// Load messages
 router.get("/:chatId", authJWT, getMessages);
 
 // Send message
@@ -21,7 +21,7 @@ router.post("/send", authJWT, upload.single("media"), sendMessage);
 // Edit message
 router.put("/:messageId", authJWT, editMessage);
 
-// Delete message (soft)
+// Delete message
 router.delete("/:messageId", authJWT, deleteMessage);
 
 // React to message

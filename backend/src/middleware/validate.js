@@ -41,14 +41,14 @@ export const validateRegister = [
   handleValidationErrors,
 ];
 
-// Auth: Login (simple, reuse some from register)
+// Auth: Login
 export const validateLogin = [
   body("username").notEmpty().withMessage("Username không được để trống"),
   body("password").notEmpty().withMessage("Password không được để trống"),
   handleValidationErrors,
 ];
 
-// Users: Profile Update (optional fields)
+// Users: Profile Update
 export const validateProfileUpdate = [
   body("fullName")
     .optional()
@@ -64,7 +64,7 @@ export const validateProfileUpdate = [
   handleValidationErrors,
 ];
 
-// Users: Search (query param)
+// Users: Search
 export const validateUserSearch = [
   query("query")
     .isLength({ min: 1, max: 50 })
@@ -72,7 +72,7 @@ export const validateUserSearch = [
   handleValidationErrors,
 ];
 
-// Friends: Send Request (ObjectId receiver)
+// Friends: Send Request
 export const validateFriendRequest = [
   body("receiverId")
     .isMongoId()
@@ -80,13 +80,13 @@ export const validateFriendRequest = [
   handleValidationErrors,
 ];
 
-// Friends: Accept/Decline (param requestId)
+// Friends: Accept/Decline
 export const validateFriendAction = [
   param("requestId").isMongoId().withMessage("Request ID không hợp lệ"),
   handleValidationErrors,
 ];
 
-// Chats: Create (type enum, participants array)
+// Chats: Create
 export const validateChatCreate = [
   body("type")
     .isIn(["direct", "group"])
@@ -105,7 +105,7 @@ export const validateChatCreate = [
   handleValidationErrors,
 ];
 
-// Chats: Invite (userIds array)
+// Chats: Invite
 export const validateChatInvite = [
   body("userIds")
     .isArray({ min: 1 })
@@ -116,7 +116,7 @@ export const validateChatInvite = [
   handleValidationErrors,
 ];
 
-// Chats: List (pagination query)
+// Chats: List
 export const validateChatList = [
   query("limit")
     .optional()
@@ -126,7 +126,7 @@ export const validateChatList = [
   handleValidationErrors,
 ];
 
-// Messages: Load (pagination)
+// Messages: Load
 export const validateMessageLoad = [
   param("chatId").isMongoId().withMessage("Chat ID không hợp lệ"),
   query("limit")
@@ -137,7 +137,7 @@ export const validateMessageLoad = [
   handleValidationErrors,
 ];
 
-// Messages: Send (content/type, file optional)
+// Messages: Send
 export const validateMessageSend = [
   body("chatId").isMongoId().withMessage("Chat ID không hợp lệ"),
   body("content")
@@ -151,7 +151,7 @@ export const validateMessageSend = [
   handleValidationErrors,
 ];
 
-// Messages: Edit/Delete/Reaction/Seen (param messageId, optional content/reactionType)
+// Messages: Edit/Delete/Reaction/Seen
 export const validateMessageAction = [
   param("messageId").isMongoId().withMessage("Message ID không hợp lệ"),
   body("content")

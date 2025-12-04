@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String }, // Cloudinary URL
     onlineStatus: { type: Boolean, default: false },
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    unreadCounts: { type: Map, of: Number, default: {} }, // chatId: unread count
+    unreadCounts: { type: Map, of: Number, default: {} },
   },
   { timestamps: true }
 );

@@ -11,18 +11,10 @@ const UserSearchModal = ({ isOpen, onClose, onSelectUser, title = "Search Users"
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    // If searching friends, we might want to show all initially or filter
-    // For now, let's require query unless it's friends mode where we might show all?
-    // Let's stick to query for consistency, or fetch all friends if query is empty in friend mode.
-    
     setLoading(true);
     try {
       if (searchMode === "friends") {
-        // Fetch all friends and filter client-side or use a search endpoint for friends if available
-        // The friendController has listFriends. Let's assume it returns all friends.
         const response = await api.get("/friends/list");
-        // response.data.friends is the list.
-        // Filter by query
         const allFriends = response.data.friends;
         const filtered = allFriends.filter(f => 
           f.username.toLowerCase().includes(query.toLowerCase()) || 
@@ -43,13 +35,6 @@ const UserSearchModal = ({ isOpen, onClose, onSelectUser, title = "Search Users"
       setLoading(false);
     }
   };
-
-  // Auto-load friends when opening in friend mode?
-  // For simplicity, let's just use the form submit or maybe useEffect if we want auto-load.
-  // Let's stick to manual search for now to keep it simple, or maybe auto-load if query is empty?
-  // Let's add a useEffect to load friends if mode is friends and query is empty?
-  // No, let's keep it manual or user triggers it. But "Show all friends" is better.
-  // Let's modify handleSearch to allow empty query for friends.
 
   return (
     <div className="modal-overlay" onClick={onClose}>

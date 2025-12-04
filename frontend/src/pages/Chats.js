@@ -12,8 +12,8 @@ const Chats = ({ onSelectChat, activeChatId }) => {
     const fetchData = async () => {
       try {
         const [chatsRes, userRes] = await Promise.all([
-            api.get("/chats"),
-            api.get("/users/profile")
+          api.get("/chats"),
+          api.get("/users/profile"),
         ]);
         setChats(chatsRes.data.chats);
         setCurrentUser(userRes.data.user);
@@ -30,10 +30,9 @@ const Chats = ({ onSelectChat, activeChatId }) => {
         type: "direct",
         participants: [user._id || user.id],
       });
-      // Refetch to get full chat details including populated fields
       const res = await api.get("/chats");
       setChats(res.data.chats);
-      
+
       setIsModalOpen(false);
       onSelectChat(response.data.chatId);
     } catch (error) {
@@ -43,18 +42,18 @@ const Chats = ({ onSelectChat, activeChatId }) => {
   };
 
   const getChatName = (chat) => {
-      if (chat.name) return chat.name;
-      if (chat.type === 'direct' || chat.participants.length === 2) {
-          const other = chat.participants.find(p => p._id !== currentUser?._id);
-          return other ? (other.fullName || other.username) : "Chat";
-      }
-      return "Group Chat";
+    if (chat.name) return chat.name;
+    if (chat.type === "direct" || chat.participants.length === 2) {
+      const other = chat.participants.find((p) => p._id !== currentUser?._id);
+      return other ? other.fullName || other.username : "Chat";
+    }
+    return "Group Chat";
   };
 
   return (
     <div className="chats-sidebar">
       <div className="chats-header">
-        <h2>Chats</h2>
+        <h2 style={{ marginLeft: "30px", textIndent: "15px" }}>Chats</h2>
       </div>
 
       <ul className="chat-list">
@@ -67,44 +66,49 @@ const Chats = ({ onSelectChat, activeChatId }) => {
         {chats.map((chat) => {
           const chatName = getChatName(chat);
           const chatId = chat._id || chat.id;
-          
+
           return (
-            <li 
-                key={chatId} 
-                className={`chat-item ${activeChatId === chatId ? 'active' : ''}`}
-                onClick={() => onSelectChat(chatId)}
+            <li
+              key={chatId}
+              className={`chat-item ${activeChatId === chatId ? "active" : ""}`}
+              onClick={() => onSelectChat(chatId)}
             >
-                <div className="chat-avatar-placeholder">
+              <div className="chat-avatar-placeholder">
                 {chatName[0]?.toUpperCase() || "C"}
-                </div>
-                <div className="chat-info">
+              </div>
+              <div className="chat-info">
                 <div className="chat-name-row">
-                    <span className="chat-name">{chatName}</span>
-                    {chat.lastMessageTime && (
+                  <span className="chat-name">{chatName}</span>
+                  {chat.lastMessageTime && (
                     <span className="chat-time">
-                        {new Date(chat.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {new Date(chat.lastMessageTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
-                    )}
+                  )}
                 </div>
                 <div className="chat-preview">
-                    {chat.unreadCount > 0 ? (
-                    <span className="unread-text">{chat.unreadCount} new messages</span>
-                    ) : (
+                  {chat.unreadCount > 0 ? (
+                    <span className="unread-text">
+                      {chat.unreadCount} new messages
+                    </span>
+                  ) : (
                     <span className="no-unread">View conversation</span>
-                    )}
+                  )}
                 </div>
-                </div>
-                {chat.unreadCount > 0 && (
+              </div>
+              {chat.unreadCount > 0 && (
                 <div className="chat-unread-badge">{chat.unreadCount}</div>
-                )}
+              )}
             </li>
           );
         })}
       </ul>
 
-      <UserSearchModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <UserSearchModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSelectUser={handleUserSelect}
         title="New Chat (Friends)"
         searchMode="friends"

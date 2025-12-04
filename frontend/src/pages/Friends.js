@@ -58,18 +58,18 @@ const Friends = ({ onSelectChat }) => {
         // Refresh lists when a new request comes in
         fetchFriends();
       };
-      
+
       const handleFriendAccepted = (data) => {
-         console.log("Friend request accepted", data);
-         fetchFriends();
-      }
+        console.log("Friend request accepted", data);
+        fetchFriends();
+      };
 
       socket.on("friendRequest", handleFriendRequest);
       socket.on("friendAccepted", handleFriendAccepted);
 
       return () => {
-          socket.off("friendRequest", handleFriendRequest);
-          socket.off("friendAccepted", handleFriendAccepted);
+        socket.off("friendRequest", handleFriendRequest);
+        socket.off("friendAccepted", handleFriendAccepted);
       };
     }
   }, [socket]);
@@ -77,7 +77,7 @@ const Friends = ({ onSelectChat }) => {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (searchQuery.trim() === "") {
-      fetchFriends(); // Reset to initial state
+      fetchFriends();
       return;
     }
     setLoading(true);
@@ -85,7 +85,7 @@ const Friends = ({ onSelectChat }) => {
       const response = await api.get(
         `/users/search?query=${encodeURIComponent(searchQuery)}`
       );
-      // When searching, we show search results but keep myFriendIds to show correct buttons
+
       setFriends(response.data.users || []);
     } catch (error) {
       console.error("Search error:", error);
@@ -99,7 +99,6 @@ const Friends = ({ onSelectChat }) => {
     try {
       await api.post("/friends/request", { receiverId: userId });
       alert("Friend request sent!");
-      // Optionally update UI to show "Request Sent" state if we tracked it
     } catch (error) {
       console.error("Request error:", error);
       alert(
@@ -175,7 +174,9 @@ const Friends = ({ onSelectChat }) => {
       {/* Incoming Requests Section */}
       {incomingRequests.length > 0 && !searchQuery && (
         <div className="requests-section">
-          <h2 className="section-title">Friend Requests ({incomingRequests.length})</h2>
+          <h2 className="section-title">
+            Friend Requests ({incomingRequests.length})
+          </h2>
           <div className="friends-grid">
             {incomingRequests.map((req) => (
               <div key={req._id} className="friend-card request-card">
@@ -215,57 +216,63 @@ const Friends = ({ onSelectChat }) => {
 
       {/* Friends List / Search Results */}
       <div className="friends-list-section">
-         <h2 className="section-title">
-            {searchQuery ? "Search Results" : `My Friends (${friends.length})`}
-         </h2>
+        <h2 className="section-title">
+          {searchQuery ? "Search Results" : `My Friends (${friends.length})`}
+        </h2>
         <div className="friends-grid">
           {friends.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">👋</div>
               <h3>{searchQuery ? "No users found" : "No friends yet"}</h3>
-              <p>{searchQuery ? "Try a different search term" : "Search for people to add!"}</p>
+              <p>
+                {searchQuery
+                  ? "Try a different search term"
+                  : "Search for people to add!"}
+              </p>
             </div>
           ) : (
             friends.map((friend) => {
-                const isOnline = onlineUsers.includes(friend._id || friend.id) || friend.onlineStatus;
-                return (
-                  <div key={friend._id || friend.id} className="friend-card">
-                    <div className="friend-card-header">
-                      <div className="friend-avatar-large">
-                        {friend.avatar ? (
-                          <img src={friend.avatar} alt={friend.fullName} />
-                        ) : (
-                          <span>{friend.username?.[0]?.toUpperCase()}</span>
-                        )}
-                      </div>
-                      {isOnline && <span className="online-badge"></span>}
-                    </div>
-
-                    <div className="friend-card-body">
-                      <h3 className="friend-name">{friend.fullName}</h3>
-                      <p className="friend-username">@{friend.username}</p>
-                    </div>
-
-                    <div className="friend-card-actions">
-                      {myFriendIds.has(friend._id || friend.id) ? (
-                        <button
-                          onClick={() => handleMessage(friend._id || friend.id)}
-                          className="button button-primary button-full"
-                        >
-                          Message
-                        </button>
+              const isOnline =
+                onlineUsers.includes(friend._id || friend.id) ||
+                friend.onlineStatus;
+              return (
+                <div key={friend._id || friend.id} className="friend-card">
+                  <div className="friend-card-header">
+                    <div className="friend-avatar-large">
+                      {friend.avatar ? (
+                        <img src={friend.avatar} alt={friend.fullName} />
                       ) : (
-                        <button
-                          onClick={() => sendRequest(friend._id || friend.id)}
-                          className="button button-secondary button-full"
-                          disabled={loading}
-                        >
-                          Add Friend
-                        </button>
+                        <span>{friend.username?.[0]?.toUpperCase()}</span>
                       )}
                     </div>
+                    {isOnline && <span className="online-badge"></span>}
                   </div>
-                );
+
+                  <div className="friend-card-body">
+                    <h3 className="friend-name">{friend.fullName}</h3>
+                    <p className="friend-username">@{friend.username}</p>
+                  </div>
+
+                  <div className="friend-card-actions">
+                    {myFriendIds.has(friend._id || friend.id) ? (
+                      <button
+                        onClick={() => handleMessage(friend._id || friend.id)}
+                        className="button button-primary button-full"
+                      >
+                        Message
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => sendRequest(friend._id || friend.id)}
+                        className="button button-secondary button-full"
+                        disabled={loading}
+                      >
+                        Add Friend
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
             })
           )}
         </div>

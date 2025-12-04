@@ -28,23 +28,27 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 
-// SIMPLE CORS - Local dev only
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
+// CORS
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 
-// Disable Helmet CSP for local dev
-app.use(helmet({
-  contentSecurityPolicy: false
-}));
+// Disable Helmet CSP
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
 
-// SIMPLE Socket.IO - Bare minimum config
+// Socket.IO - Bare minimum config
 const io = new Server(server, {
   cors: {
     origin: true,
-    credentials: true
-  }
+    credentials: true,
+  },
 });
 
 console.log("Socket.IO initialized (minimal config)");
@@ -80,14 +84,12 @@ import userRoutes from "./routes/users.js";
 import friendRoutes from "./routes/friends.js";
 import chatRoutes from "./routes/chats.js";
 import messageRoutes from "./routes/messages.js";
-import reactionRoutes from "./routes/reactions.js";
 
 app.use("/api/auth", limiter, authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/friends", friendRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/messages", limiter, messageRoutes);
-app.use("/api/reactions", reactionRoutes);
 
 // Socket setup
 import("./sockets/socketManager.js").then(({ setupSockets }) => {
@@ -98,23 +100,21 @@ import("./sockets/socketManager.js").then(({ setupSockets }) => {
 import { errorHandler } from "./middleware/errorHandler.js";
 app.use(errorHandler);
 
-// Production serve frontend
+// serve frontend
+const frontendDistPath = path.join(__dirname, "../../frontend/build");
 
-  const frontendDistPath = path.join(__dirname, "../../frontend/build");
-  
-  if (fs.existsSync(frontendDistPath)) {
-    app.use(express.static(frontendDistPath));
-    
-    app.get("*", (req, res) => {
-      if (req.path.startsWith("/api") || req.path.startsWith("/socket.io")) {
-        return res.status(404).json({ message: "Not found" });
-      }
-      res.sendFile(path.join(frontendDistPath, "index.html"));
-    });
-  } else {
-    console.error("Frontend build not found! Run: cd frontend && npm run build");
-  }
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
 
+  app.get("*", (req, res) => {
+    if (req.path.startsWith("/api") || req.path.startsWith("/socket.io")) {
+      return res.status(404).json({ message: "Not found" });
+    }
+    res.sendFile(path.join(frontendDistPath, "index.html"));
+  });
+} else {
+  console.error("Frontend build not found! Run: cd frontend && npm run build");
+}
 
 app.use((req, res) => {
   res.status(404).json({ message: "API Route Not Found" });

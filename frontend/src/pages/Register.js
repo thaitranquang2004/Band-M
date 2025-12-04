@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // ← Thêm useState cho isSubmitting
+import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -8,9 +8,9 @@ import "./Login.css";
 
 const Register = () => {
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false); // ← Thêm loading state
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Schema sync backend, fix dob handle empty string
+  // Schema sync backend
   const schema = yup.object({
     username: yup
       .string()
@@ -27,15 +27,15 @@ const Register = () => {
       .email("Invalid email format"),
     phone: yup.string().optional(),
     dob: yup
-      .string() // ← Đổi sang string để handle empty ""
+      .string()
       .optional()
       .nullable()
       .test("is-valid-date", "Invalid date", function (value) {
-        if (!value || value === "") return true; // Empty OK (optional)
-        const date = new Date(value); // YYYY-MM-DD from <input type="date">
-        return !isNaN(date.getTime()) && date <= new Date(); // Valid & not future
+        if (!value || value === "") return true;
+        const date = new Date(value);
+        return !isNaN(date.getTime()) && date <= new Date();
       })
-      .transform((value) => (value && value !== "" ? value : undefined)), // Clean to undefined
+      .transform((value) => (value && value !== "" ? value : undefined)),
   });
 
   const {
@@ -47,14 +47,13 @@ const Register = () => {
     resolver: yupResolver(schema),
   });
 
-  // ← Thêm onInvalid để debug khi validation fail
   const onInvalid = (validationErrors) => {
-    console.error("Validation failed:", validationErrors); // Log errors cụ thể
-    alert("Please fix form errors before submitting!"); // UX feedback
+    console.error("Validation failed:", validationErrors);
+    alert("Please fix form errors before submitting!");
   };
 
   const onSubmit = async (data) => {
-    console.log("onSubmit triggered!"); // ← Debug log
+    console.log("onSubmit triggered!");
     setIsSubmitting(true);
     const payload = {
       ...data,
@@ -80,14 +79,13 @@ const Register = () => {
     }
   };
 
-  // ← Log errors real-time để debug
   console.log("Current errors:", errors);
 
   return (
     <div className="login-container">
       <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="login-form">
         {" "}
-        {/* ← Thêm onInvalid */}
+        {/* onInvalid */}
         <h1 className="login-title">Band M Register</h1>
         <div className="input-group">
           <input
@@ -150,11 +148,7 @@ const Register = () => {
             <span className="error-text">{errors.dob.message}</span>
           )}
         </div>
-        <button
-          type="submit"
-          className="login-button"
-          disabled={isSubmitting} // ← Chỉ disable khi submitting, không dựa errors
-        >
+        <button type="submit" className="login-button" disabled={isSubmitting}>
           {isSubmitting ? "Registering..." : "Register"}
         </button>
         <div className="form-footer">

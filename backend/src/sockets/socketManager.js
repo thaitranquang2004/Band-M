@@ -33,11 +33,11 @@ export const setupSockets = (io) => {
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.user.username} (${socket.id})`);
 
-    // Initialize handlers (trả về functions từ userHandler)
+    // Initialize handlers
     const { handleUserOffline, handleJoinMyChats } = userHandler(io, socket);
     chatHandler(io, socket);
 
-    // Auto-join chats sau connect (KHÔNG cần emit từ client)
+    // Auto-join chats sau connect
     handleJoinMyChats();
 
     // Global disconnect handler

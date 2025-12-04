@@ -41,7 +41,7 @@ export const userHandler = (io, socket) => {
     }
   };
 
-  // Register events (nếu client vẫn emit, nhưng giờ auto-call)
+  // Register events
   socket.on("joinMyChats", handleJoinMyChats);
   
   // Initial setup: Online ngay sau connect
@@ -49,6 +49,6 @@ export const userHandler = (io, socket) => {
 
   return {
     handleUserOffline,
-    handleJoinMyChats  // Export để socketManager gọi
+    handleJoinMyChats 
   };
 };

@@ -1,54 +1,53 @@
 // src/modules/auth/authController.js
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../models/User.js"; // Adjust path nếu cần
+import User from "../models/User.js";
 
 // Register: Tạo user mới, hash pw, generate tokens, set refresh cookie
 export const register = async (req, res) => {
   try {
     const { username, password, fullName, email, phone, dob } = req.body;
 
-    // Check existing user (theo ERD: unique username/email)
+    // Check existing user (unique username/email)
     const existing = await User.findOne({ $or: [{ username }, { email }] });
     if (existing) {
       return res.status(400).json({ message: "Username/Email exists" });
     }
 
-    // Tạo user (bcrypt auto-hash pw từ pre-save hook)
+    // Tạo user
     const user = new User({ username, password, fullName, email, phone, dob });
     await user.save();
 
-    // Generate JWT tokens (theo Auth Flowchart)
+    // Generate JWT tokens
     const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_ACCESS_EXPIRE, // e.g., '15m'
+      expiresIn: process.env.JWT_ACCESS_EXPIRE, // '15m'
     });
     const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_REFRESH_EXPIRE, // e.g., '7d'
+      expiresIn: process.env.JWT_REFRESH_EXPIRE, // '7d'
     });
 
-    // Set HttpOnly cookie cho refreshToken (security: không access từ JS)
+    // Set HttpOnly cookie cho refreshToken
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Secure trên Render
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
 
     res.status(201).json({ message: "Success", userId: user._id });
   } catch (err) {
-    console.error("Register error:", err); // Debug log
+    console.error("Register error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Login: Verify pw, generate tokens, set cookie, return user info (không pw)
+// Login: Verify pw, generate tokens, set cookie, return user info
 export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Tìm user và verify pw (sử dụng comparePassword method)
+    // Tìm user và verify pw
     const user = await User.findOne({ username });
     if (!user || !(await user.comparePassword(password))) {
-      // Giả sử model có method này
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
@@ -67,7 +66,6 @@ export const login = async (req, res) => {
       sameSite: "strict",
     });
 
-    // Return accessToken + user info (theo API design: id, username, fullName, email, avatar)
     res.json({
       accessToken,
       user: {
@@ -75,7 +73,7 @@ export const login = async (req, res) => {
         username: user.username,
         fullName: user.fullName,
         email: user.email,
-        avatar: user.avatar || "", // Default nếu chưa có
+        avatar: user.avatar || "",
       },
     });
   } catch (err) {
@@ -84,9 +82,9 @@ export const login = async (req, res) => {
   }
 };
 
-// Logout: Clear refresh cookie (không cần blacklist vì stateless JWT)
+// Logout: Clear refresh cookie
 export const logout = async (req, res) => {
-  console.log("Logout, clearing cookie"); // Debug như cũ
+  console.log("Logout, clearing cookie");
   res.clearCookie("refreshToken", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -95,7 +93,7 @@ export const logout = async (req, res) => {
   res.json({ message: "Logout success" });
 };
 
-// Refresh: Verify refresh cookie, generate new accessToken
+// Refresh
 export const refreshToken = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;

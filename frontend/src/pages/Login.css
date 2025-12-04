@@ -1,8 +1,7 @@
-/* Thiết lập nền và căn giữa cho toàn trang */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  background-color: #f0f2f5; /* Màu nền xám nhạt */
+  background-color: #f0f2f5;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -10,7 +9,6 @@ body {
   margin: 0;
 }
 
-/* Container chính bao bọc form */
 .login-container {
   width: 100%;
   display: flex;
@@ -18,7 +16,6 @@ body {
   padding: 20px;
 }
 
-/* Khối form (hiệu ứng "card") */
 .login-form {
   background-color: #ffffff;
   padding: 2.5rem 2rem;
@@ -29,7 +26,6 @@ body {
   box-sizing: border-box;
 }
 
-/* Tiêu đề */
 .login-title {
   text-align: center;
   color: #1d2129;
@@ -38,12 +34,10 @@ body {
   font-weight: 600;
 }
 
-/* Nhóm input (nếu bạn muốn dùng label) */
 .input-group {
   margin-bottom: 1rem;
 }
 
-/* Ô input */
 .login-input {
   width: 100%;
   padding: 12px 15px;
@@ -55,14 +49,12 @@ body {
   margin-bottom: 1rem;
 }
 
-/* Hiệu ứng khi focus vào input */
 .login-input:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
-/* Nút Login */
 .login-button {
   width: 100%;
   padding: 12px 15px;
@@ -80,17 +72,15 @@ body {
   background-color: #0056b3;
 }
 
-/* Cập nhật phần footer */
 .form-footer {
   text-align: center;
-  margin-top: 1.5rem; /* Tăng khoảng cách với nút Login */
+  margin-top: 1.5rem;
   display: flex;
-  flex-direction: column; /* Xếp các link chồng lên nhau */
-  align-items: center; /* Căn giữa theo chiều ngang */
-  gap: 10px; /* Khoảng cách giữa 2 dòng link */
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Áp dụng cho cả <a> và <Link> */
 .footer-link {
   color: #007bff;
   text-decoration: none;
@@ -102,42 +92,34 @@ body {
   text-decoration: underline;
 }
 
-/* Màu chữ cho đoạn "Chưa có tài khoản?" */
 .footer-text {
   font-size: 0.9rem;
   color: #555;
 }
 
-/* --- Thêm các class này vào file Login.css --- */
-
-/* Style cho <label> */
 .input-group {
   width: 100%;
   margin-bottom: 1rem;
 }
 
 .input-group label {
-  display: block; /* Hiển thị label trên 1 dòng riêng */
+  display: block;
   margin-bottom: 5px;
   font-weight: 500;
   color: #333;
   font-size: 0.9rem;
 }
 
-/* Xóa margin-bottom của input khi dùng trong group */
 .input-group .login-input {
   margin-bottom: 0;
 }
 
-/* Style cho input bị 'disabled' (màu xám) */
 .login-input:disabled {
   background-color: #e9ecef;
   cursor: not-allowed;
   opacity: 0.8;
 }
 
-
-/* Placeholder cho Avatar */
 .profile-avatar-section {
   margin-bottom: 1.5rem;
 }
@@ -174,4 +156,3 @@ body {
   font-size: 18px;
   color: #007bff;
 }
-

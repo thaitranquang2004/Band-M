@@ -11,10 +11,11 @@ export const createChat = async (req, res) => {
     // Enforce friendship for direct chats
     if (type === "direct") {
       const otherUserId = participants[0];
-      // Reload user with friends to be sure
       const currentUser = await User.findById(req.user._id);
       if (!currentUser.friends.includes(otherUserId)) {
-         return res.status(403).json({ message: "You can only message friends" });
+        return res
+          .status(403)
+          .json({ message: "You can only message friends" });
       }
 
       const existingChat = await Chat.findOne({
@@ -22,7 +23,10 @@ export const createChat = async (req, res) => {
         participants: { $all: [...participants, req.user._id], $size: 2 },
       });
       if (existingChat) {
-        return res.json({ chatId: existingChat._id.toString(), message: "Existing chat returned" });
+        return res.json({
+          chatId: existingChat._id.toString(),
+          message: "Existing chat returned",
+        });
       }
     }
 
@@ -32,7 +36,6 @@ export const createChat = async (req, res) => {
       participants: [...participants, req.user._id],
     });
     await chat.save();
-
     res.json({ chatId: chat._id.toString(), message: "Created" });
   } catch (err) {
     console.error("Error in createChat:", err);
@@ -47,7 +50,6 @@ export const inviteToGroup = async (req, res) => {
     const chat = await Chat.findById(req.params.chatId);
     if (!chat) return res.status(404).json({ message: "Chat not found" });
 
-    // Check if user is participant
     if (!chat.participants.includes(req.user._id))
       return res.status(403).json({ message: "Not authorized" });
 
@@ -68,7 +70,6 @@ export const inviteToGroup = async (req, res) => {
 export const listChats = async (req, res) => {
   try {
     const { limit = 20, offset = 0 } = req.query;
-    // Aggregate: join participants, last message, unread
     const chats = await Chat.aggregate([
       { $match: { participants: req.user._id } },
       {
@@ -109,7 +110,7 @@ export const listChats = async (req, res) => {
       },
       {
         $project: {
-          _id: { $toString: "$_id" },  // Convert ObjectId to string
+          _id: { $toString: "$_id" },
           name: 1,
           type: 1,
           participants: 1,
@@ -118,7 +119,7 @@ export const listChats = async (req, res) => {
         },
       },
     ]);
-    
+
     res.json({ chats });
   } catch (err) {
     console.error("Error in listChats:", err);
@@ -129,18 +130,24 @@ export const listChats = async (req, res) => {
 // Get single chat details
 export const getChatDetails = async (req, res) => {
   try {
-    const chat = await Chat.findById(req.params.chatId)
-      .populate("participants", "username fullName avatar");
+    const chat = await Chat.findById(req.params.chatId).populate(
+      "participants",
+      "username fullName avatar"
+    );
 
     if (!chat) {
       return res.status(404).json({ message: "Chat not found" });
     }
 
     // Check if participant
-    if (!chat.participants.some((p) => p._id.toString() === req.user._id.toString())) {
+    if (
+      !chat.participants.some(
+        (p) => p._id.toString() === req.user._id.toString()
+      )
+    ) {
       return res.status(403).json({ message: "Not authorized" });
     }
-    
+
     res.json({ chat });
   } catch (err) {
     console.error("Error in getChatDetails:", err);

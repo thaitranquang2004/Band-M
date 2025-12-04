@@ -1,5 +1,4 @@
 import User from "../models/User.js";
-import cloudinary from "cloudinary";
 import { v2 as cloudinaryV2 } from "cloudinary";
 import fs from "fs";
 
@@ -64,7 +63,7 @@ export const searchUsers = async (req, res) => {
         { username: { $regex: query, $options: "i" } },
         { fullName: { $regex: query, $options: "i" } },
       ],
-      _id: { $ne: req.user._id }, // Exclude self
+      _id: { $ne: req.user._id },
     })
       .select("id username fullName avatar onlineStatus")
       .limit(10);

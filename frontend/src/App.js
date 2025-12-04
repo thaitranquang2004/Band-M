@@ -41,13 +41,13 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// MainLayout: Chứa Navbar + Routes + Auto-redirect logic
+// MainLayout
 const MainLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Effect 1: Check Auth & Redirect (Runs on location change)
+  // Check Auth & Redirect
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
@@ -56,7 +56,10 @@ const MainLayout = () => {
         if (decoded.exp * 1000 > Date.now()) {
           setIsAuthenticated(true);
           // Redirect if on login/register pages
-          if (location.pathname === "/login" || location.pathname === "/register") {
+          if (
+            location.pathname === "/login" ||
+            location.pathname === "/register"
+          ) {
             navigate("/", { replace: true });
           }
         } else {
@@ -93,7 +96,6 @@ const MainLayout = () => {
   );
 };
 
-// App: Chỉ bọc Router
 function App() {
   return (
     <Router>

@@ -1,7 +1,6 @@
 import Message from "../models/Message.js";
 import Chat from "../models/Chat.js";
 import User from "../models/User.js";
-import cloudinary from "cloudinary";
 import { v2 as cloudinaryV2 } from "cloudinary";
 import fs from "fs";
 import CryptoJS from "crypto-js";
@@ -73,7 +72,7 @@ export const sendMessage = async (req, res) => {
     const message = new Message({
       chat: chatId,
       sender: req.user._id,
-      content, // Will be encrypted by pre-save hook
+      content,
       type,
       mediaUrl,
     });
@@ -94,19 +93,19 @@ export const sendMessage = async (req, res) => {
       "username fullName avatar"
     );
 
-    // Emit real-time (Use ORIGINAL content, not encrypted one from DB)
+    // Emit real-time
     const messageData = {
       _id: message._id,
       id: message._id,
-      chat: chatId, // Add chatId for frontend filtering
-      content: content, // Use plain text content from request
+      chat: chatId,
+      content: content,
       sender: populatedMessage.sender,
       type,
       mediaUrl,
       createdAt: message.createdAt,
     };
-    
-    // Emit to chat room (for all participants including sender)
+
+    // Emit to chat room
     req.io?.to(`chat_${chatId}`).emit("newMessage", messageData);
 
     res.json({ messageId: message._id, message: "Sent" });
@@ -124,13 +123,13 @@ export const editMessage = async (req, res) => {
     if (!message || message.sender.toString() !== req.user._id.toString())
       return res.status(403).json({ message: "Not owner" });
 
-    message.content = req.body.content; // Will be re-encrypted on save
+    message.content = req.body.content;
     message.isEdited = true;
     await message.save();
 
     req.io?.to(`chat_${message.chat}`).emit("messageEdited", {
       messageId: message._id,
-      content: req.body.content, // Emit plain text
+      content: req.body.content,
     });
 
     res.json({ message: "Edited" });
@@ -178,15 +177,11 @@ export const reactToMessage = async (req, res) => {
       message.reactions.splice(existingReactionIndex, 1);
     } else {
       // Add reaction
-      // Optional: Remove other reactions by same user if you only want one reaction per user
-      // message.reactions = message.reactions.filter(r => r.user.toString() !== userId.toString());
-      
       message.reactions.push({ user: userId, type });
     }
 
     await message.save();
 
-    // Populate reactions.user to send back full info
     const populatedMessage = await Message.findById(messageId).populate(
       "reactions.user",
       "username fullName avatar"
@@ -197,7 +192,9 @@ export const reactToMessage = async (req, res) => {
       reactions: populatedMessage.reactions,
     };
 
-    req.io?.to(`chat_${message.chat}`).emit("messageReactionUpdate", reactionData);
+    req.io
+      ?.to(`chat_${message.chat}`)
+      .emit("messageReactionUpdate", reactionData);
 
     res.json(reactionData);
   } catch (err) {
@@ -205,3 +202,34 @@ export const reactToMessage = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// Mark seen
+// export const markSeen = async (req, res) => {
+//   try {
+//     const message = await Message.findById(req.params.messageId);
+//     if (!message) return res.status(404).json({ message: "Not found" });
+
+//     // Upsert seen
+//     await MessageSeen.findOneAndUpdate(
+//       { message: req.params.messageId, user: req.user._id },
+//       { seenAt: new Date() },
+//       { upsert: true }
+//     );
+
+//     // Reduce unread count
+//     await User.findByIdAndUpdate(req.user._id, {
+//       $inc: { [`unreadCounts.${message.chat}`]: -1 },
+//     });
+
+//     req.io
+//       ?.to(`chat_${message.chat}`)
+//       .emit("messageSeen", {
+//         messageId: req.params.messageId,
+//         userId: req.user._id,
+//       });
+
+//     res.json({ message: "Seen" });
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };

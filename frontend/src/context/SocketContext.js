@@ -15,15 +15,15 @@ export const SocketProvider = ({ children, isAuthenticated }) => {
     const token = localStorage.getItem("accessToken");
 
     if (isAuthenticated && token) {
-      // Use environment variable for production, fallback to localhost for dev
-      const socketUrl = process.env.REACT_APP_SOCKET_URL || "http://localhost:5000";
-      
+      const socketUrl =
+        process.env.REACT_APP_SOCKET_URL || "http://localhost:5000";
+
       const newSocket = io(socketUrl, {
-        auth: { token: `Bearer ${token}` }
+        auth: { token: `Bearer ${token}` },
       });
 
       newSocket.on("connect", () => {
-        console.log("✅ Socket connected:", newSocket.id);
+        console.log("Socket connected:", newSocket.id);
       });
 
       newSocket.on("connect_error", (err) => {
@@ -58,12 +58,10 @@ export const SocketProvider = ({ children, isAuthenticated }) => {
   const value = {
     socket,
     onlineUsers: Array.from(onlineUsers),
-    isConnected: !!socket?.connected
+    isConnected: !!socket?.connected,
   };
 
   return (
-    <SocketContext.Provider value={value}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
   );
 };
